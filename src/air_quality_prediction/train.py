@@ -11,6 +11,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from tqdm import tqdm
 
 from .data_utils import generate_synthetic_data, prepare_data
 from .model import AirQualityModel
@@ -47,7 +48,10 @@ def train_model(
         'test_loss': []
     }
     
-    for epoch in range(epochs):
+    # Create progress bar for epochs
+    pbar = tqdm(range(epochs), desc="Training", unit="epoch")
+    
+    for epoch in pbar:
         # Training phase
         model.train()
         train_losses = []
@@ -83,11 +87,13 @@ def train_model(
         history['train_loss'].append(avg_train_loss)
         history['test_loss'].append(avg_test_loss)
         
-        if (epoch + 1) % 10 == 0:
-            print(f"Epoch [{epoch+1}/{epochs}], "
-                  f"Train Loss: {avg_train_loss:.4f}, "
-                  f"Test Loss: {avg_test_loss:.4f}")
+        # Update progress bar with current metrics
+        pbar.set_postfix({
+            'train_loss': f'{avg_train_loss:.4f}',
+            'test_loss': f'{avg_test_loss:.4f}'
+        })
     
+    pbar.close()
     return history
 
 
