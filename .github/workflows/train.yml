@@ -43,6 +43,10 @@ jobs:
         run: |
           uv run python -m air_quality_prediction.train
       
+      - name: Update docs with latest results
+        run: |
+          bash scripts/update_docs.sh
+      
       - name: Upload model artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -54,5 +58,5 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add outputs/
+          git add outputs/ docs/outputs/
           git diff --quiet && git diff --staged --quiet || (git commit -m "Update training results [skip ci]" && git push)
