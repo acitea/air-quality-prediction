@@ -1,0 +1,12 @@
+{
+  "timestamp": "20251104_125128",
+  "final_train_loss": 44.535931701660154,
+  "final_test_loss": 25.671961648123606,
+  "device": "cpu",
+  "model_path": "/home/runner/work/air-quality-prediction/air-quality-prediction/models/air_quality_model_20251104_125128.pt",
+  "predictions": {
+    "mean_actual": 31.762582778930664,
+    "mean_predicted": 31.868946075439453,
+    "mae": 4.020017623901367
+  }
+}
