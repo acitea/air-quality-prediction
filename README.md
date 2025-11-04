@@ -125,6 +125,7 @@ The modular structure makes it easy to:
 - **NumPy & Pandas**: Data manipulation
 - **Scikit-learn**: Utilities and metrics
 - **Matplotlib**: Visualization
+- **tqdm**: Progress tracking with real-time metrics
 - **GitHub Actions**: CI/CD automation
 - **GitHub Pages**: Web hosting
 
