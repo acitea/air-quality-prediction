@@ -1,0 +1,24 @@
+[project]
+name = "air-quality-prediction"
+version = "0.1.0"
+description = "Air Quality Prediction using PyTorch"
+readme = "README.md"
+authors = [
+    { name = "copilot-swe-agent[bot]", email = "198982749+Copilot@users.noreply.github.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "matplotlib>=3.10.7",
+    "numpy>=2.3.4",
+    "pandas>=2.3.3",
+    "scikit-learn>=1.7.2",
+    "torch>=2.9.0",
+    "tqdm>=4.67.1",
+]
+
+[project.scripts]
+air-quality-prediction = "air_quality_prediction:main"
+
+[build-system]
+requires = ["uv_build>=0.9.7,<0.10.0"]
+build-backend = "uv_build"
