@@ -10,7 +10,6 @@ mkdir -p docs/outputs
 
 # Copy latest results
 cp outputs/latest_results.json docs/outputs/
-cp outputs/training_history.png docs/outputs/
 cp outputs/predictions.png docs/outputs/
 
 echo "Docs updated successfully!"
