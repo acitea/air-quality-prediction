@@ -1,12 +1,12 @@
 {
-  "timestamp": "20251104_130544",
-  "final_train_loss": 42.900741500854494,
-  "final_test_loss": 25.076154708862305,
+  "timestamp": "20251104_130917",
+  "final_train_loss": 42.09697746276856,
+  "final_test_loss": 25.47600827898298,
   "device": "cpu",
-  "model_path": "/home/runner/work/air-quality-prediction/air-quality-prediction/models/air_quality_model_20251104_130544.pt",
+  "model_path": "/home/runner/work/air-quality-prediction/air-quality-prediction/models/air_quality_model_20251104_130917.pt",
   "predictions": {
     "mean_actual": 31.762582778930664,
-    "mean_predicted": 31.742359161376953,
-    "mae": 3.8637185096740723
+    "mean_predicted": 31.79886245727539,
+    "mae": 3.9243075847625732
   }
 }
