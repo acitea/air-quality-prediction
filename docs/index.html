@@ -172,7 +172,8 @@
         <div class="section">
             <h2>📈 Training Progress</h2>
             <div class="chart-container">
-                <img src="../outputs/training_history.png" alt="Training History" onerror="this.style.display='none'; document.getElementById('train-error').style.display='block';">
+                <!-- Using relative path as outputs are copied to docs/outputs/ -->
+                <img src="outputs/training_history.png" alt="Training History" onerror="this.style.display='none'; document.getElementById('train-error').style.display='block';">
                 <div id="train-error" class="error" style="display: none;">
                     Training history chart not available yet. The model needs to be trained first.
                 </div>
@@ -182,7 +183,8 @@
         <div class="section">
             <h2>🎯 Prediction Accuracy</h2>
             <div class="chart-container">
-                <img src="../outputs/predictions.png" alt="Predictions vs Actuals" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
+                <!-- Using relative path as outputs are copied to docs/outputs/ -->
+                <img src="outputs/predictions.png" alt="Predictions vs Actuals" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
                 <div id="pred-error" class="error" style="display: none;">
                     Predictions chart not available yet. The model needs to be trained first.
                 </div>
@@ -213,7 +215,8 @@
         // Fetch and display latest results
         async function loadResults() {
             try {
-                const response = await fetch('../outputs/latest_results.json');
+                // Using relative path as outputs are copied to docs/outputs/
+                const response = await fetch('outputs/latest_results.json');
                 const data = await response.json();
                 
                 // Update metrics
