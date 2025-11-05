@@ -1,27 +1,27 @@
 [project]
 name = "air-quality-prediction"
 version = "0.1.0"
-description = "Air Quality Prediction using PyTorch"
+description = "Add your description here"
 readme = "README.md"
-authors = [
-    { name = "copilot-swe-agent[bot]", email = "198982749+Copilot@users.noreply.github.com" }
-]
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 dependencies = [
-    "dotenv>=0.9.9",
-    "ipykernel>=7.1.0",
-    "matplotlib>=3.10.7",
-    "numpy>=2.3.4",
-    "pandas>=2.3.3",
-    "requests>=2.32.5",
-    "rich>=14.2.0",
-    "scikit-learn>=1.7.2",
+    "email-validator==2.2.0",
+    "faker>=37.12.0",
+    "geopy==2.4.1",
+    "hopsworks[great-expectations,python]>=4.4.2",
+    "invoke>=2.2.1",
+    "matplotlib==3.8.3",
+    "nbformat>=5.10.4",
+    "openmeteo-requests>=1.7.4",
+    "plotly>=6.4.0",
+    "pydantic-settings>=2.6.1",
+    "python-dotenv>=1.2.1",
+    "requests-cache==1.2.0",
+    "retry-requests==2.0.0",
+    "rich>=13.9.4",
+    "scikit-learn==1.2.2",
+    "seaborn>=0.13.2",
+    "streamlit==1.28.2",
     "tqdm>=4.67.1",
+    "xgboost==2.0.3",
 ]
-
-[project.scripts]
-air-quality-prediction = "air_quality_prediction:main"
-
-[build-system]
-requires = ["uv_build>=0.9.7,<0.10.0"]
-build-backend = "uv_build"
