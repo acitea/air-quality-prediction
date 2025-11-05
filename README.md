@@ -1,142 +1,49 @@
-# Air Quality Prediction 🌍
+# mlfs-book
+O'Reilly book - Building Machine Learning Systems with a feature store: batch, real-time, and LLMs
 
-A PyTorch-based machine learning project for predicting PM2.5 air quality levels using environmental and traffic data. The project features automated daily training via GitHub Actions and real-time results visualization through GitHub Pages.
 
-## Features
+## ML System Examples
 
-- 🤖 **PyTorch Neural Network**: Deep learning model for PM2.5 prediction
-- 📦 **UV Package Manager**: Modern, fast Python package management
-- ⏰ **Automated Training**: Daily scheduled training via GitHub Actions
-- 📊 **Interactive Dashboard**: Real-time results on GitHub Pages
-- 📈 **Performance Tracking**: Visualizations of model performance and predictions
 
-## Model Architecture
+[Dashboards for Example ML Systems](https://featurestorebook.github.io/mlfs-book/)
 
-The air quality prediction model uses a feedforward neural network with:
-- **Input Layer**: 5 features (temperature, humidity, wind speed, pressure, traffic density)
-- **Hidden Layers**: 2 layers with 64 neurons each, ReLU activation, and dropout
-- **Output Layer**: Single output (PM2.5 concentration in µg/m³)
 
-## Installation
 
-### Prerequisites
 
-- Python 3.12+
-- [UV package manager](https://github.com/astral-sh/uv)
+# Run Air Quality Tutorial
 
-### Setup
+See [tutorial instructions here](https://docs.google.com/document/d/1YXfM1_rpo1-jM-lYyb1HpbV9EJPN6i1u6h2rhdPduNE/edit?usp=sharing)
+    # Create a conda or virtual environment for your project
+    conda create -n book 
+    conda activate book
 
-1. Clone the repository:
-```bash
-git clone https://github.com/acitea/air-quality-prediction.git
-cd air-quality-prediction
-```
+    # Install 'uv' and 'invoke'
+    pip install invoke dotenv
 
-2. Install UV (if not already installed):
-```bash
-pip install uv
-```
+    # 'invoke install' installs python dependencies using uv and requirements.txt
+    invoke install
 
-3. Install dependencies:
-```bash
-uv sync
-```
 
-## Usage
+## PyInvoke
 
-### Training the Model
+    invoke aq-backfill
+    invoke aq-features
+    invoke aq-train
+    invoke aq-inference
+    invoke aq-clean
 
-Run the training pipeline:
-```bash
-uv run python -m air_quality_prediction.train
-```
 
-Or use the package entry point:
-```bash
-uv run air-quality-prediction
-```
 
-### View Results
+## Feldera
 
-After training, check the generated files:
-- `models/air_quality_model_*.pt` - Trained model weights
-- `outputs/latest_results.json` - Training metrics and predictions
-- `outputs/training_history.png` - Training/validation loss plot
-- `outputs/predictions.png` - Predicted vs actual values plot
 
-### GitHub Pages Dashboard
+pip install feldera ipython-secrets
+sudo apt-get install python3-secretstorage
+sudo apt-get install gnome-keyring 
 
-Visit the GitHub Pages site to see interactive visualizations of the latest predictions and model performance: [View Dashboard](https://acitea.github.io/air-quality-prediction/)
+mkdir -p /tmp/c.app.hopsworks.ai
+ln -s  /tmp/c.app.hopsworks.ai ~/hopsworks
+docker run -p 8080:8080 \
+  -v ~/hopsworks:/tmp/c.app.hopsworks.ai \
+  --tty --rm -it ghcr.io/feldera/pipeline-manager:latest
 
-## Project Structure
-
-```
-air-quality-prediction/
-├── .github/
-│   └── workflows/
-│       ├── train.yml           # Daily training workflow
-│       └── deploy-pages.yml    # GitHub Pages deployment
-├── src/
-│   └── air_quality_prediction/
-│       ├── __init__.py         # Package entry point
-│       ├── model.py            # PyTorch model definition
-│       ├── data_utils.py       # Data generation and processing
-│       └── train.py            # Training pipeline
-├── data/                       # Data directory
-├── models/                     # Saved model checkpoints
-├── outputs/                    # Training outputs and visualizations
-├── docs/                       # GitHub Pages site
-│   ├── index.html             # Dashboard HTML
-│   └── outputs/               # Copied outputs for web display
-├── pyproject.toml             # UV project configuration
-└── README.md                  # This file
-```
-
-## Automated Training
-
-The project uses GitHub Actions to automatically train the model daily at 2:00 AM UTC. The workflow:
-1. Checks out the latest code
-2. Sets up Python and UV
-3. Installs dependencies
-4. Runs the training pipeline
-5. Uploads model artifacts
-6. Commits and pushes results to the repository
-
-You can also manually trigger training from the Actions tab in GitHub.
-
-## Development
-
-### Running Tests
-
-Currently, the project focuses on the core training pipeline. Tests can be added in future iterations.
-
-### Adding New Features
-
-The modular structure makes it easy to:
-- Modify the model architecture in `model.py`
-- Add new features in `data_utils.py`
-- Customize training parameters in `train.py`
-- Update the dashboard in `docs/index.html`
-
-## Technologies
-
-- **PyTorch**: Deep learning framework
-- **UV**: Python package manager
-- **NumPy & Pandas**: Data manipulation
-- **Scikit-learn**: Utilities and metrics
-- **Matplotlib**: Visualization
-- **tqdm**: Progress tracking with real-time metrics
-- **GitHub Actions**: CI/CD automation
-- **GitHub Pages**: Web hosting
-
-## License
-
-This project is available for educational and research purposes.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## Acknowledgments
-
-Built with modern Python tooling and best practices for reproducible machine learning.
