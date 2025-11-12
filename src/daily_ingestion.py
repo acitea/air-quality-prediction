@@ -561,7 +561,7 @@ def main():
                 version=2,
                 time_threshold=time_threshold
                 )
-            days_lagged_df.to_csv(f"src/hopsworks/{fg}_lagged.csv", index=False)
+            # days_lagged_df.to_csv(f"src/hopsworks/{fg}_lagged.csv", index=False) # Uncomment to "attempt to cache" locally
             fg_data[fg] = pd.concat([df, days_lagged_df]).drop_duplicates().reset_index(drop=True)
             fg_data[fg]['timestamp'] = pd.to_datetime(fg_data[fg]['timestamp'], utc=True)
 
