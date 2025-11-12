@@ -30,12 +30,15 @@ jobs:
           HOPSWORKS_PROJECT_NAME: ${{ secrets.HOPSWORKS_PROJECT_NAME }}
         run: |
           uv run src/daily_ingestion.py
-
+      - name: Get current date
+        id: date
+        run: |
+          echo "{date}={$(date +'%Y-%m-%d')}" >> "$GITHUB_OUTPUT"
       - name: Upload logs on failure
         if: failure()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: ingestion-logs
+          name: ingestion-logs-${{ steps.date.outputs.date }}
           path: |
             *.log
             *.txt
