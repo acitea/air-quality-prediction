@@ -244,8 +244,8 @@ def main():
     eval_metric="mae"
     random_state=42
 
-    model, df, mse, r2 = train(X_features, X_test_features, y_train, y_test, X_test, n_estimators, learning_rate, max_depth, min_child_weight, subsample, colsample_bytree, reg_alpha, reg_alpha, tree_method, eval_metric, random_state)
-    plot(model, REGION, df)
+    model, df, mse, r2 = train(X_features, X_test_features, y_train, y_test, X_test, n_estimators, learning_rate, max_depth, min_child_weight, subsample, colsample_bytree, reg_alpha, reg_lambda, tree_method, eval_metric, random_state)
+    # plot(model, REGION, df)
 
     save(model, mse, r2, feature_view)
 
