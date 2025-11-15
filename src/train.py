@@ -14,6 +14,7 @@ from matplotlib.patches import Patch
 
 import hopsworks
 from hsfs.feature import Feature
+from utils.hopworks_utils import retrieve_feature_stores
 
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -23,33 +24,6 @@ def get_hopsworks_project():
     project = hopsworks.login(engine="python", project="akeelaf")
     fs = project.get_feature_store()
     return fs
-
-def retrieve_feature_stores(fs):
-    pm25_daily_fg = fs.get_feature_group(
-        name="pm25_daily",
-        version=2
-    )
-
-    wind_direction_daily_fg = fs.get_feature_group(
-        name="wind_direction_daily",
-        version=3
-    )
-
-    wind_speed_daily_fg = fs.get_feature_group(
-        name="wind_speed_daily",
-        version=3
-    )
-
-    air_temperature_daily_fg = fs.get_feature_group(
-        name="air_temperature_daily",
-        version=3
-    )
-
-    print("pm_25_daily_fg:", "Loaded" if pm25_daily_fg is not None else "Not Loaded")
-    print("wind_direction_daily_fg:", "Loaded" if wind_direction_daily_fg is not None else "Not Loaded")
-    print("wind_speed_daily_fg:", "Loaded" if wind_speed_daily_fg is not None else "Not Loaded")
-    print("air_temperature_daily_fg:", "Loaded" if air_temperature_daily_fg is not None else "Not Loaded")
-    return pm25_daily_fg, wind_direction_daily_fg, wind_speed_daily_fg, air_temperature_daily_fg
 
 def create_feature_view(fs, pm25_daily_fg, wind_direction_daily_fg, wind_speed_daily_fg, air_temperature_daily_fg, REGION="west"):
     selected_features = pm25_daily_fg.select(["pm25","pm25_lag_1d", "pm25_lag_2d", "pm25_lag_3d", "pm25_lag_7d", "pm25_lag_14d", "pm25_rolling_mean_3d", "pm25_rolling_mean_7d", "pm25_rolling_mean_14d", "pm25_rolling_mean_28d", "pm25_rolling_min_3d", "pm25_rolling_min_7d","pm25_rolling_min_14d", "pm25_rolling_min_28d", "pm25_rolling_max_3d", "pm25_rolling_max_7d","pm25_rolling_max_14d", "pm25_rolling_max_28d", "timestamp", "region"]).filter(pm25_daily_fg.region == REGION).join(
@@ -144,29 +118,7 @@ def plot_air_quality_forecast(city: str, street: str, df: pd.DataFrame, file_pat
     plt.savefig(file_path)
     return plt
 
-def main():
-    REGION = "west" # TODO: support multiple regions
-    START_DATE = "2025-10-01"
-
-    fs = get_hopsworks_project()
-    pm25_daily_fg, wind_direction_daily_fg, wind_speed_daily_fg, air_temperature_daily_fg = retrieve_feature_stores(fs)
-    feature_view = create_feature_view(fs, pm25_daily_fg, wind_direction_daily_fg, wind_speed_daily_fg, air_temperature_daily_fg, REGION=REGION)
-    print("Feature view created:", feature_view.name)
-    X_features, y_train, X_test_features, y_test, X_test = split_data(feature_view, START_DATE)
-    
-    # Creating an instance of the XGBoost Regressor
-    n_estimators = 3000
-    learning_rate = 0.02
-    max_depth = 5
-    min_child_weight = 4
-    subsample=0.8
-    colsample_bytree=0.8
-    reg_alpha=0.5
-    reg_lambda=1.5
-    tree_method="hist"
-    eval_metric="mae"
-    random_state=42
-
+def train(X_features, X_test_features, y_train, y_test, X_test, n_estimators, learning_rate, max_depth, min_child_weight, subsample, colsample_bytree, reg_alpha, reg_lambda, tree_method, eval_metric, random_state):
     xgb_regressor = XGBRegressor(
         n_estimators=n_estimators,
         learning_rate=learning_rate,
@@ -202,6 +154,9 @@ def main():
     df = df.sort_values(by=['timestamp'])
     df.head(15)
 
+    return xgb_regressor, df, mse, r2
+
+def plot(model, REGION, df):
     # Creating a directory for the model artifacts if it doesn't exist
     model_dir = "air_quality_model"
     if not os.path.exists(model_dir):
@@ -215,10 +170,59 @@ def main():
     plt.show()
 
     # Plotting feature importances using the plot_importance function from XGBoost
-    plot_importance(xgb_regressor.get_booster(), max_num_features=15)
+    plot_importance(model.get_booster(), max_num_features=15)
     feature_importance_path = images_dir + "/feature_importance.png"
     plt.savefig(feature_importance_path)
     plt.show()
+
+
+def save(model, mse, r2, feature_view):
+    project = hopsworks.login(engine="python", project="akeelaf")
+    model_dir = "air_quality_model"
+    model.save_model(model_dir + "/model.json")
+    res_dict = { 
+        "MSE": str(mse),
+        "R squared": str(r2),
+    }
+    mr = project.get_model_registry()
+    aq_model = mr.python.create_model(
+        name="air_quality_xgboost_model", 
+        metrics= res_dict,
+        feature_view=feature_view,
+        description="Air Quality (PM2.5) predictor",
+    )
+
+    # Saving the model artifacts to the 'air_quality_model' directory in the model registry
+    aq_model.save(model_dir)
+
+
+def main():
+    REGION = "west" # TODO: support multiple regions
+    START_DATE = "2025-10-01"
+
+    fs = get_hopsworks_project()
+    pm25_daily_fg, wind_direction_daily_fg, wind_speed_daily_fg, air_temperature_daily_fg = retrieve_feature_stores(fs)
+    feature_view = create_feature_view(fs, pm25_daily_fg, wind_direction_daily_fg, wind_speed_daily_fg, air_temperature_daily_fg, REGION=REGION)
+    print("Feature view created:", feature_view.name)
+    X_features, y_train, X_test_features, y_test, X_test = split_data(feature_view, START_DATE)
+    
+    # Creating an instance of the XGBoost Regressor
+    n_estimators = 3000
+    learning_rate = 0.02
+    max_depth = 5
+    min_child_weight = 4
+    subsample=0.8
+    colsample_bytree=0.8
+    reg_alpha=0.5
+    reg_lambda=1.5
+    tree_method="hist"
+    eval_metric="mae"
+    random_state=42
+
+    model, df, mse, r2 = train(X_features, X_test_features, y_train, y_test, X_test, n_estimators, learning_rate, max_depth, min_child_weight, subsample, colsample_bytree, reg_alpha, reg_alpha, tree_method, eval_metric, random_state)
+    plot(model, REGION, df)
+
+    save(model, mse, r2, feature_view)
 
 
 if __name__ == "__main__":
