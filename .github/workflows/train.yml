@@ -40,6 +40,9 @@ jobs:
           uv sync
       
       - name: Run training
+        env:
+          HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
+          HOPSWORKS_PROJECT_NAME: ${{ secrets.HOPSWORKS_PROJECT_NAME }}
         run: |
           uv run src/train.py
       
