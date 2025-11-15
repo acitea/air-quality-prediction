@@ -32,6 +32,12 @@ ENDPOINTS = {
     'air_temperature': f"{API_BASE_URL}/air-temperature"
 }
 
+REGION_COORDS = pd.DataFrame({
+    "region": ["central", "north", "south", "east", "west"],
+    "latitude": [1.3521, 1.4180, 1.2800, 1.3500, 1.3400],
+    "longitude": [103.8198, 103.8270, 103.8500, 103.9400, 103.7000]
+})
+
 # Get D-1 date in Singapore 
 CURRENT_DATE = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
@@ -47,6 +53,29 @@ from utils.regression import \
     regression_features_air_temperature_daily, \
     apply_func_to_groups, \
     add_time_features
+
+def _map_coords_to_region(df: pd.DataFrame, region_coords: pd.DataFrame) -> pd.Series:
+    """
+    For each row in df (with latitude/longitude) find the nearest region from region_coords.
+    Returns a pandas Series of region names aligned with df.
+    """
+    # df: N x 2 (lat, lon)
+    sensor_xy = df[["latitude", "longitude"]].to_numpy()  # shape (N, 2)
+    # region_coords: M x 2 (lat, lon)
+    region_xy = region_coords[["latitude", "longitude"]].to_numpy()  # shape (M, 2)
+
+    # compute squared distances (N, M)
+    # distance^2 = (lat1 - lat2)^2 + (lon1 - lon2)^2
+    diff_lat = sensor_xy[:, [0]] - region_xy[:, 0]  # (N, 1) - (M,) -> (N, M)
+    diff_lon = sensor_xy[:, [1]] - region_xy[:, 1]
+    dist_sq = diff_lat**2 + diff_lon**2  # (N, M)
+
+    # index of closest region for each sensor row
+    nearest_idx = dist_sq.argmin(axis=1)  # (N,)
+
+    # map to region names
+    regions = region_coords["region"].to_numpy()
+    return pd.Series(regions[nearest_idx], index=df.index, name="region")
 
 
 # ============================================================================
@@ -156,6 +185,7 @@ def process_pm25_data(items: List[Dict]) -> Tuple[pd.DataFrame, pd.DataFrame]:
 
     df = pd.DataFrame(flattened)
     df['timestamp'] = pd.to_datetime(df['timestamp'])
+   
     df['pm25'] = pd.to_numeric(df['pm25'], errors='coerce')
     df = df.dropna(subset=['pm25'])
 
@@ -247,6 +277,7 @@ def process_wind_speed_data(items: List[Dict], stations: Dict) -> Tuple[pd.DataF
                         'wind_speed_avg_std',
                         'latitude', 'longitude']
     daily_df['timestamp'] = pd.to_datetime(daily_df['date'])
+    daily_df['region'] = _map_coords_to_region(daily_df, REGION_COORDS)
     daily_df = daily_df.drop('date', axis=1)
 
     print(f"  Processed {len(daily_df)} daily wind speed records")
@@ -338,6 +369,7 @@ def process_wind_direction_data(items: List[Dict], stations: Dict) -> Tuple[pd.D
 
     daily_df = pd.DataFrame(daily_data)
     daily_df['timestamp'] = pd.to_datetime(daily_df['date'])
+    daily_df['region'] = _map_coords_to_region(daily_df, REGION_COORDS)
     daily_df = daily_df.drop('date', axis=1)
 
     print(f"  Processed {len(daily_df)} daily wind direction records")
@@ -413,6 +445,7 @@ def process_air_temperature_data(items: List[Dict], stations: Dict) -> Tuple[pd.
                         'air_temperature_avg_std',
                         'latitude', 'longitude']
     daily_df['timestamp'] = pd.to_datetime(daily_df['date'])
+    daily_df['region'] = _map_coords_to_region(daily_df, REGION_COORDS)
     daily_df = daily_df.drop('date', axis=1)
 
     print(f"  Processed {len(daily_df)} daily air temperature records")
@@ -582,7 +615,7 @@ def main():
 
         # Upload to Hopsworks
         print("\n[3/3] Uploading to Hopsworks...")
-        hopsworks_client.append_to_hopsworks(fg_data, version=2)
+        hopsworks_client.append_to_hopsworks(fg_data, version=3)
 
         elapsed = time.time() - start_time
         print("\n" + "=" * 70)
