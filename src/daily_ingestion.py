@@ -538,7 +538,7 @@ def main():
         # Process data
         print("\n[2/3] Processing data...")
         print("\nProcessing PM2.5...")
-        pm25_hourly_df, _ = process_pm25_data(pm25_data['items'])
+        pm25_hourly_df, pm25_daily_df = process_pm25_data(pm25_data['items'])
 
         print("\nProcessing wind speed...")
         wind_speed_df, wind_speed_daily_df = process_wind_speed_data(
@@ -555,7 +555,7 @@ def main():
             air_temperature_data['items'], air_temperature_data['stations']
         )
 
-            # pm25_daily_df.empty and \
+            
         if pm25_hourly_df.empty and \
            wind_speed_df.empty and wind_speed_daily_df.empty and \
            wind_direction_df.empty and wind_direction_daily_df.empty and \
@@ -568,7 +568,7 @@ def main():
 
 
         fg_data = {
-            # "pm25_daily": pm25_daily_df, 
+            "pm25_daily": pm25_daily_df, 
             "pm25_hourly": pm25_hourly_df, 
             "wind_speed_hourly": wind_speed_df, 
             "wind_speed_daily": wind_speed_daily_df, 
@@ -601,7 +601,7 @@ def main():
         # [df.to_csv(f"src/data_temp/{name}.csv", index=False) for name, df in fg_data.items()] # Uncomment to "attempt to cache" locally
         # [print(name, df.info()) for name, df in fg_data.items()] # Uncomment to debug data types & stats
 
-        # fg_data["pm25_daily"] = apply_func_to_groups(add_time_features(fg_data["pm25_daily"], add_hour=False), 'region', regression_features_pm25_daily)
+        fg_data["pm25_daily"] = apply_func_to_groups(add_time_features(fg_data["pm25_daily"], add_hour=False), 'region', regression_features_pm25_daily)
         fg_data["pm25_hourly"] = apply_func_to_groups(add_time_features(fg_data["pm25_hourly"], add_hour=True), 'region', regression_features_pm25_hourly)
         fg_data["wind_speed_hourly"] = apply_func_to_groups(add_time_features(fg_data["wind_speed_hourly"], add_hour=True), 'station_name', regression_features_wind_speed)
         fg_data["wind_speed_daily"] = apply_func_to_groups(add_time_features(fg_data["wind_speed_daily"], add_hour=False), 'station_name', regression_features_wind_speed_daily)
