@@ -14,10 +14,35 @@ from matplotlib.patches import Patch
 
 import hopsworks
 from hsfs.feature import Feature
-from utils.hopworks_utils import retrieve_feature_stores
-
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
+
+def retrieve_feature_stores(fs):
+    pm25_daily_fg = fs.get_feature_group(
+        name="pm25_daily",
+        version=2
+    )
+
+    wind_direction_daily_fg = fs.get_feature_group(
+        name="wind_direction_daily",
+        version=3
+    )
+
+    wind_speed_daily_fg = fs.get_feature_group(
+        name="wind_speed_daily",
+        version=3
+    )
+
+    air_temperature_daily_fg = fs.get_feature_group(
+        name="air_temperature_daily",
+        version=3
+    )
+
+    print("pm_25_daily_fg:", "Loaded" if pm25_daily_fg is not None else "Not Loaded")
+    print("wind_direction_daily_fg:", "Loaded" if wind_direction_daily_fg is not None else "Not Loaded")
+    print("wind_speed_daily_fg:", "Loaded" if wind_speed_daily_fg is not None else "Not Loaded")
+    print("air_temperature_daily_fg:", "Loaded" if air_temperature_daily_fg is not None else "Not Loaded")
+    return pm25_daily_fg, wind_direction_daily_fg, wind_speed_daily_fg, air_temperature_daily_fg
 
 def get_hopsworks_project():
     dotenv.load_dotenv()
@@ -26,7 +51,7 @@ def get_hopsworks_project():
     return fs
 
 def create_feature_view(fs, pm25_daily_fg, wind_direction_daily_fg, wind_speed_daily_fg, air_temperature_daily_fg, REGION="west"):
-    selected_features = pm25_daily_fg.select(["pm25","pm25_lag_1d", "pm25_lag_2d", "pm25_lag_3d", "pm25_lag_7d", "pm25_lag_14d", "pm25_rolling_mean_3d", "pm25_rolling_mean_7d", "pm25_rolling_mean_14d", "pm25_rolling_mean_28d", "pm25_rolling_min_3d", "pm25_rolling_min_7d","pm25_rolling_min_14d", "pm25_rolling_min_28d", "pm25_rolling_max_3d", "pm25_rolling_max_7d","pm25_rolling_max_14d", "pm25_rolling_max_28d", "timestamp", "region"]).filter(pm25_daily_fg.region == REGION).join(
+    selected_features = pm25_daily_fg.select_all().filter(pm25_daily_fg.region == REGION).join(
         wind_direction_daily_fg.select_all(), on=["region", "timestamp"]
     ).join(
         wind_speed_daily_fg.select_all(), on=["region", "timestamp"]
