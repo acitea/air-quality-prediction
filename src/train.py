@@ -1,147 +1,224 @@
-import json
-from datetime import datetime
-from pathlib import Path
-from typing import Dict, List
+import os
+from datetime import datetime, timedelta
+import dotenv
+import pandas as pd
+from xgboost import XGBRegressor
 
-import matplotlib.pyplot as plt
 import numpy as np
 
+from sklearn.metrics import mean_squared_error, r2_score
+import matplotlib.pyplot as plt
+from matplotlib.ticker import MultipleLocator
+from xgboost import plot_importance
+from matplotlib.patches import Patch
 
-def train_model(
-    model,
-    train_loader,
-    test_loader,
-) -> Dict[str, List[float]]:
-    """
-    Train the air quality prediction model.
-    
-    Args:
-        model: The model to train
-        train_loader: DataLoader for training data
-        test_loader: DataLoader for test data
-    Returns:
-        Dictionary with training history
-    """
-    history = {
-        'train_loss': [],
-        'test_loss': []
-    }
+import hopsworks
+from hsfs.feature import Feature
 
-    return history
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
 
+def get_hopsworks_project():
+    dotenv.load_dotenv()
+    project = hopsworks.login(engine="python", project="akeelaf")
+    fs = project.get_feature_store()
+    return fs
 
-def generate_predictions(
-    model,
-    n_samples: int = 10
-) -> Dict[str, np.ndarray]:
-    """
-    Generate predictions for visualization.
-    
-    Args:
-        model: Trained model
-        n_samples: Number of samples to generate predictions for
-        
-    Returns:
-        Dictionary with actual and predicted values
-    """
-    
-    # TODO
-    actuals = []
-    predictions = []
-    return {
-        'actual': actuals,
-        'predicted': predictions
-    }
+def retrieve_feature_stores(fs):
+    pm25_daily_fg = fs.get_feature_group(
+        name="pm25_daily",
+        version=2
+    )
 
-# TODO: Implement Plots to be saved
-def save_plots(history: Dict, predictions: Dict, output_dir: Path):
-    """
-    Save training plots.
-    
-    Args:
-        history: Training history
-        predictions: Prediction results
-        output_dir: Directory to save plots
-    """
-    output_dir.mkdir(parents=True, exist_ok=True)
-    
-    # Plot predictions vs actuals
-    plt.figure(figsize=(10, 6))
-    plt.scatter(predictions['actual'], predictions['predicted'], alpha=0.5)
-    min_val = min(predictions['actual'].min(), predictions['predicted'].min())
-    max_val = max(predictions['actual'].max(), predictions['predicted'].max())
-    plt.plot([min_val, max_val], [min_val, max_val], 'r--', label='Perfect Prediction')
-    plt.xlabel('Actual PM2.5')
-    plt.ylabel('Predicted PM2.5')
-    plt.title('Predictions vs Actuals')
-    plt.legend()
-    plt.grid(True)
-    plt.savefig(output_dir / 'predictions.png')
-    plt.close()
+    wind_direction_daily_fg = fs.get_feature_group(
+        name="wind_direction_daily",
+        version=3
+    )
 
-def get_data():
-    # TODO: Implement data retrieval
-    pass
+    wind_speed_daily_fg = fs.get_feature_group(
+        name="wind_speed_daily",
+        version=3
+    )
 
-def prepare_data(df):
-    # TODO: Implement data parsing
-    pass
+    air_temperature_daily_fg = fs.get_feature_group(
+        name="air_temperature_daily",
+        version=3
+    )
 
-def main():
-    """Main training function."""
-    print("Starting Air Quality Prediction Training...")
-    
-    # Create directories
-    base_dir = Path(__file__).parent.parent.parent
-    models_dir = base_dir / "models"
-    outputs_dir = base_dir / "outputs"
-    models_dir.mkdir(exist_ok=True)
-    outputs_dir.mkdir(exist_ok=True)
-    
-    # Prepare data
-    print("Getting data...")
-    df = get_data(n_samples=1000)
-    train_loader, test_loader = prepare_data(df)
-    
-    model = None  # TODO: Initialize your model here
+    print("pm_25_daily_fg:", "Loaded" if pm25_daily_fg is not None else "Not Loaded")
+    print("wind_direction_daily_fg:", "Loaded" if wind_direction_daily_fg is not None else "Not Loaded")
+    print("wind_speed_daily_fg:", "Loaded" if wind_speed_daily_fg is not None else "Not Loaded")
+    print("air_temperature_daily_fg:", "Loaded" if air_temperature_daily_fg is not None else "Not Loaded")
+    return pm25_daily_fg, wind_direction_daily_fg, wind_speed_daily_fg, air_temperature_daily_fg
 
-    # Train model
-    print("Training model...")
-    history = train_model(
-        model, train_loader, test_loader
+def create_feature_view(fs, pm25_daily_fg, wind_direction_daily_fg, wind_speed_daily_fg, air_temperature_daily_fg, REGION="west"):
+    selected_features = pm25_daily_fg.select(["pm25","pm25_lag_1d", "pm25_lag_2d", "pm25_lag_3d", "pm25_lag_7d", "pm25_lag_14d", "pm25_rolling_mean_3d", "pm25_rolling_mean_7d", "pm25_rolling_mean_14d", "pm25_rolling_mean_28d", "pm25_rolling_min_3d", "pm25_rolling_min_7d","pm25_rolling_min_14d", "pm25_rolling_min_28d", "pm25_rolling_max_3d", "pm25_rolling_max_7d","pm25_rolling_max_14d", "pm25_rolling_max_28d", "timestamp", "region"]).filter(pm25_daily_fg.region == REGION).join(
+        wind_direction_daily_fg.select_all(), on=["region", "timestamp"]
+    ).join(
+        wind_speed_daily_fg.select_all(), on=["region", "timestamp"]
+    ).join(
+        air_temperature_daily_fg.select_all(), on=["region", "timestamp"]
     )
     
-    # Save model
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    model_path = models_dir / f"air_quality_model_{timestamp}.pt"
-    print(f"Model saved to {model_path}")
-    # TODO: Save to Hopsworks
+    feature_view = fs.get_or_create_feature_view(
+        name="air_quality_wind_temperature_features_daily_new",
+        version=2,
+        description="Feature view with air quality and weather features (wind speed/direction and temperature)",
+        labels=['pm25'],
+        query=selected_features
+    )
+
+    return feature_view
+
+def split_data(feature_view, START_DATE):
+    test_start = datetime.strptime(START_DATE, "%Y-%m-%d")
+    X_train, X_test, y_train, y_test = feature_view.train_test_split(
+        test_start=test_start
+    )
+    print("Test data starts from:", test_start.date())
+
+    X_features = X_train.drop(columns=['timestamp'])
+    X_test_features = X_test.drop(columns=['timestamp'])
+    X_features.dropna(inplace=True)
+    mask = X_features.dropna().index
+    X_features = X_features.loc[mask].reset_index(drop=True)
+    y_train = y_train.loc[mask].reset_index(drop=True)
+
+    X_features = X_features.select_dtypes(include=["number"]).copy()
+    X_test_features = X_test_features.select_dtypes(include=["number"]).copy()
+
+    return X_features, y_train, X_test_features, y_test, X_test
+
+def calculate_metrics(y_pred, y_test):
+    # Calculating Mean Squared Error (MSE) using sklearn
+    mse = mean_squared_error(y_test.iloc[:,0], y_pred)
+
+    # Calculating R squared using sklearn
+    r2 = r2_score(y_test.iloc[:,0], y_pred)
+    return mse, r2
+
+def plot_air_quality_forecast(city: str, street: str, df: pd.DataFrame, file_path: str, hindcast=False):
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    day = pd.to_datetime(df['timestamp']).dt.date
+    # Plot each column separately in matplotlib
+    ax.plot(day, df['predicted_pm25'], label='Predicted PM2.5', color='red', linewidth=2, marker='o', markersize=5, markerfacecolor='blue')
+
+    # Set the y-axis to a logarithmic scale
+    ax.set_yscale('log')
+    ax.set_yticks([0, 10, 25, 50, 100, 250, 500])
+    ax.get_yaxis().set_major_formatter(plt.ScalarFormatter())
+    ax.set_ylim(bottom=1)
+
+    # Set the labels and title
+    ax.set_xlabel('Date')
+    ax.set_title(f"PM2.5 Predicted (Logarithmic Scale) for {city}, {street}")
+    ax.set_ylabel('PM2.5')
+
+    colors = ['green', 'yellow', 'orange', 'red', 'purple', 'darkred']
+    labels = ['Good', 'Moderate', 'Unhealthy for Some', 'Unhealthy', 'Very Unhealthy', 'Hazardous']
+    ranges = [(0, 49), (50, 99), (100, 149), (150, 199), (200, 299), (300, 500)]
+    for color, (start, end) in zip(colors, ranges):
+        ax.axhspan(start, end, color=color, alpha=0.3)
+
+    # Add a legend for the different Air Quality Categories
+    patches = [Patch(color=colors[i], label=f"{labels[i]}: {ranges[i][0]}-{ranges[i][1]}") for i in range(len(colors))]
+    legend1 = ax.legend(handles=patches, loc='upper right', title="Air Quality Categories", fontsize='x-small')
+
+    # Aim for ~10 annotated values on x-axis, will work for both forecasts ans hindcasts
+    if len(df.index) > 11:
+        every_x_tick = len(df.index) / 10
+        ax.xaxis.set_major_locator(MultipleLocator(every_x_tick))
+
+    plt.xticks(rotation=45)
+
+    if hindcast == True:
+        ax.plot(day, df['pm25'], label='Actual PM2.5', color='black', linewidth=2, marker='^', markersize=5, markerfacecolor='grey')
+        legend2 = ax.legend(loc='upper left', fontsize='x-small')
+        ax.add_artist(legend1)
+
+    # Ensure everything is laid out neatly
+    plt.tight_layout()
+
+    # # Save the figure, overwriting any existing file with the same name
+    plt.savefig(file_path)
+    return plt
+
+def main():
+    REGION = "west" # TODO: support multiple regions
+    START_DATE = "2025-10-01"
+
+    fs = get_hopsworks_project()
+    pm25_daily_fg, wind_direction_daily_fg, wind_speed_daily_fg, air_temperature_daily_fg = retrieve_feature_stores(fs)
+    feature_view = create_feature_view(fs, pm25_daily_fg, wind_direction_daily_fg, wind_speed_daily_fg, air_temperature_daily_fg, REGION=REGION)
+    print("Feature view created:", feature_view.name)
+    X_features, y_train, X_test_features, y_test, X_test = split_data(feature_view, START_DATE)
     
-    # Generate predictions
-    print("Generating predictions...")
-    predictions = generate_predictions(model, test_loader)
-    
-    # Save plots
-    print("Saving plots...")
-    save_plots(history, predictions, outputs_dir)
-    
-    # Save results metadata
-    results = {
-        'timestamp': timestamp,
-        'predictions': {
-            'mean_actual': float(predictions['actual'].mean()),
-            'mean_predicted': float(predictions['predicted'].mean()),
-            'mae': float(np.mean(np.abs(predictions['actual'] - predictions['predicted'])))
-        }
-    }
-    
-    results_path = outputs_dir / 'latest_results.json'
-    with open(results_path, 'w') as f:
-        json.dump(results, f, indent=2)
-    
-    print(f"Results saved to {results_path}")
-    
-    return results
+    # Creating an instance of the XGBoost Regressor
+    n_estimators = 3000
+    learning_rate = 0.02
+    max_depth = 5
+    min_child_weight = 4
+    subsample=0.8
+    colsample_bytree=0.8
+    reg_alpha=0.5
+    reg_lambda=1.5
+    tree_method="hist"
+    eval_metric="mae"
+    random_state=42
+
+    xgb_regressor = XGBRegressor(
+        n_estimators=n_estimators,
+        learning_rate=learning_rate,
+        max_depth=max_depth, 
+        min_child_weight=min_child_weight,
+        subsample=subsample,
+        colsample_bytree=colsample_bytree,
+        reg_alpha=reg_alpha,
+        reg_lambda=reg_lambda,
+        tree_method=tree_method,
+        eval_metric=eval_metric,
+        random_state=random_state,
+    )
+
+    print("Training using XGBRegressor model with params: ")
+    print("Learning rate: ", learning_rate)
+    print("Max depth: ", max_depth)
+    print("Estimators: ", n_estimators)
+
+    # Fitting the XGBoost Regressor to the training data
+    xgb_regressor.fit(X_features, y_train)
+    y_pred = xgb_regressor.predict(X_test_features)
+
+    # Calculating metrics
+    mse, r2 = calculate_metrics(y_pred, y_test)
+    print("MSE:", mse)
+    print("R squared:", r2)
+
+    df = y_test
+    df['predicted_pm25'] = y_pred
+
+    df['timestamp'] = X_test['timestamp']
+    df = df.sort_values(by=['timestamp'])
+    df.head(15)
+
+    # Creating a directory for the model artifacts if it doesn't exist
+    model_dir = "air_quality_model"
+    if not os.path.exists(model_dir):
+        os.mkdir(model_dir)
+    images_dir = model_dir + "/images"
+    if not os.path.exists(images_dir):
+        os.mkdir(images_dir)
+
+    file_path = images_dir + "/pm25_hindcast.png"
+    plt = plot_air_quality_forecast('Singapore', REGION, df, file_path, hindcast=True) 
+    plt.show()
+
+    # Plotting feature importances using the plot_importance function from XGBoost
+    plot_importance(xgb_regressor.get_booster(), max_num_features=15)
+    feature_importance_path = images_dir + "/feature_importance.png"
+    plt.savefig(feature_importance_path)
+    plt.show()
 
 
 if __name__ == "__main__":
