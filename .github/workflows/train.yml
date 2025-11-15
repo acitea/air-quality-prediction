@@ -41,7 +41,7 @@ jobs:
       
       - name: Run training
         run: |
-          uv run python -m air_quality_prediction.train
+          uv run src/train.py
       
       - name: Update docs with latest results
         run: |
