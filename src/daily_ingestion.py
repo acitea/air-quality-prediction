@@ -438,13 +438,13 @@ def process_air_temperature_data(items: List[Dict], stations: Dict) -> Tuple[pd.
 
     # Daily aggregations
     df['date'] = df['timestamp'].dt.date
-    daily_df = df.groupby(['station_name', 'date']).agg({
+    daily_df = df.groupby(['region', 'date']).agg({
         'air_temperature': ['mean', 'min', 'max', 'std'],
         'latitude': 'first',
         'longitude': 'first'
     }).reset_index()
 
-    daily_df.columns = ['station_name', 'date',
+    daily_df.columns = ['region', 'date',
                         'air_temperature_avg_mean', 'air_temperature_avg_min', 'air_temperature_avg_max',
                         'air_temperature_avg_std',
                         'latitude', 'longitude']
