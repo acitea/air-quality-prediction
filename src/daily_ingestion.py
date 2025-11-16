@@ -247,18 +247,20 @@ def process_wind_speed_data(items: List[Dict], stations: Dict) -> Tuple[pd.DataF
 
     # Add station metadata
     df['station_name'] = df['station_id'].map(lambda x: stations.get(x, {}).get('name', 'Unknown'))
+    df.drop(columns=['station_name'], axis=1, inplace=True)
+    df['region'] = _map_coords_to_region(df, REGION_COORDS)
     df['latitude'] = df['station_id'].map(lambda x: stations.get(x, {}).get('latitude'))
     df['longitude'] = df['station_id'].map(lambda x: stations.get(x, {}).get('longitude'))
 
     # Aggregate to hourly
     df['hour'] = df['timestamp'].dt.floor('H')
-    hourly_df = df.groupby(['station_name', 'hour']).agg({
+    hourly_df = df.groupby(['region', 'hour']).agg({
         'wind_speed': ['mean', 'count'],
         'latitude': 'first',
         'longitude': 'first'
     }).reset_index()
 
-    hourly_df.columns = ['station_name', 'timestamp', 
+    hourly_df.columns = ['region', 'timestamp', 
                          'wind_speed_avg',
                          'reading_count',
                          'latitude', 'longitude']
@@ -266,18 +268,17 @@ def process_wind_speed_data(items: List[Dict], stations: Dict) -> Tuple[pd.DataF
 
     # Daily aggregations
     df['date'] = df['timestamp'].dt.date
-    daily_df = df.groupby(['station_name', 'date']).agg({
+    daily_df = df.groupby(['region', 'date']).agg({
         'wind_speed': ['mean', 'min', 'max', 'std'],
         'latitude': 'first',
         'longitude': 'first'
     }).reset_index()
 
-    daily_df.columns = ['station_name', 'date',
+    daily_df.columns = ['region', 'date',
                         'wind_speed_avg_mean', 'wind_speed_avg_min', 'wind_speed_avg_max',
                         'wind_speed_avg_std',
                         'latitude', 'longitude']
     daily_df['timestamp'] = pd.to_datetime(daily_df['date'])
-    daily_df['region'] = _map_coords_to_region(daily_df, REGION_COORDS)
     daily_df = daily_df.drop('date', axis=1)
 
     print(f"  Processed {len(daily_df)} daily wind speed records")
@@ -325,6 +326,8 @@ def process_wind_direction_data(items: List[Dict], stations: Dict) -> Tuple[pd.D
 
     # Add station metadata
     df['station_name'] = df['station_id'].map(lambda x: stations.get(x, {}).get('name', 'Unknown'))
+    df['region'] = _map_coords_to_region(df, REGION_COORDS)
+    df.drop(columns=['station_name'], axis=1, inplace=True)
     df['latitude'] = df['station_id'].map(lambda x: stations.get(x, {}).get('latitude'))
     df['longitude'] = df['station_id'].map(lambda x: stations.get(x, {}).get('longitude'))
 
@@ -332,11 +335,11 @@ def process_wind_direction_data(items: List[Dict], stations: Dict) -> Tuple[pd.D
     df['hour'] = df['timestamp'].dt.floor('H')
 
     hourly_data = []
-    for (station_name, hour), group in df.groupby(['station_name', 'hour']):
+    for (region, hour), group in df.groupby(['region', 'hour']):
         directions = group['wind_direction'].values
 
         hourly_data.append({
-            'station_name': station_name,
+            'region': region,
             'timestamp': hour,
             'wind_direction_avg': circular_mean(directions),
             'wind_direction_std': circular_std(directions),
@@ -353,11 +356,11 @@ def process_wind_direction_data(items: List[Dict], stations: Dict) -> Tuple[pd.D
     df['date'] = df['timestamp'].dt.date
 
     daily_data = []
-    for (station_name, date), group in df.groupby(['station_name', 'date']):
+    for (region, date), group in df.groupby(['region', 'date']):
         directions = group['wind_direction'].values
 
         daily_data.append({
-            'station_name': station_name,
+            'region': region,
             'date': date,
             'wind_direction_avg_mean': circular_mean(directions),
             'wind_direction_avg_std': circular_std(directions),
@@ -369,7 +372,6 @@ def process_wind_direction_data(items: List[Dict], stations: Dict) -> Tuple[pd.D
 
     daily_df = pd.DataFrame(daily_data)
     daily_df['timestamp'] = pd.to_datetime(daily_df['date'])
-    daily_df['region'] = _map_coords_to_region(daily_df, REGION_COORDS)
     daily_df = daily_df.drop('date', axis=1)
 
     print(f"  Processed {len(daily_df)} daily wind direction records")
@@ -413,19 +415,21 @@ def process_air_temperature_data(items: List[Dict], stations: Dict) -> Tuple[pd.
     df = df.dropna(subset=['air_temperature'])
 
     # Add station metadata
+    daily_df['region'] = _map_coords_to_region(daily_df, REGION_COORDS)
     df['station_name'] = df['station_id'].map(lambda x: stations.get(x, {}).get('name', 'Unknown'))
+    df.drop(columns=['station_name'], axis=1, inplace=True)
     df['latitude'] = df['station_id'].map(lambda x: stations.get(x, {}).get('latitude'))
     df['longitude'] = df['station_id'].map(lambda x: stations.get(x, {}).get('longitude'))
 
     # Aggregate to hourly
     df['hour'] = df['timestamp'].dt.floor('H')
-    hourly_df = df.groupby(['station_name', 'hour']).agg({
+    hourly_df = df.groupby(['region', 'hour']).agg({
         'air_temperature': ['mean', 'count'],
         'latitude': 'first',
         'longitude': 'first'
     }).reset_index()
 
-    hourly_df.columns = ['station_name', 'timestamp',
+    hourly_df.columns = ['region', 'timestamp',
                          'air_temperature_avg',
                          'reading_count',
                          'latitude', 'longitude']
@@ -445,7 +449,6 @@ def process_air_temperature_data(items: List[Dict], stations: Dict) -> Tuple[pd.
                         'air_temperature_avg_std',
                         'latitude', 'longitude']
     daily_df['timestamp'] = pd.to_datetime(daily_df['date'])
-    daily_df['region'] = _map_coords_to_region(daily_df, REGION_COORDS)
     daily_df = daily_df.drop('date', axis=1)
 
     print(f"  Processed {len(daily_df)} daily air temperature records")
@@ -603,12 +606,12 @@ def main():
 
         fg_data["pm25_daily"] = apply_func_to_groups(add_time_features(fg_data["pm25_daily"], add_hour=False), 'region', regression_features_pm25_daily)
         fg_data["pm25_hourly"] = apply_func_to_groups(add_time_features(fg_data["pm25_hourly"], add_hour=True), 'region', regression_features_pm25_hourly)
-        fg_data["wind_speed_hourly"] = apply_func_to_groups(add_time_features(fg_data["wind_speed_hourly"], add_hour=True), 'station_name', regression_features_wind_speed)
-        fg_data["wind_speed_daily"] = apply_func_to_groups(add_time_features(fg_data["wind_speed_daily"], add_hour=False), 'station_name', regression_features_wind_speed_daily)
-        fg_data["wind_direction_hourly"] = apply_func_to_groups(add_time_features(fg_data["wind_direction_hourly"], add_hour=True), 'station_name', regression_features_wind_direction)
-        fg_data["wind_direction_daily"] = apply_func_to_groups(add_time_features(fg_data["wind_direction_daily"], add_hour=False), 'station_name', regression_features_wind_direction_daily)
-        fg_data["air_temperature_hourly"] = apply_func_to_groups(add_time_features(fg_data["air_temperature_hourly"], add_hour=True), 'station_name', regression_features_air_temperature)
-        fg_data["air_temperature_daily"] = apply_func_to_groups(add_time_features(fg_data["air_temperature_daily"], add_hour=False), 'station_name', regression_features_air_temperature_daily)
+        fg_data["wind_speed_hourly"] = apply_func_to_groups(add_time_features(fg_data["wind_speed_hourly"], add_hour=True), 'region', regression_features_wind_speed)
+        fg_data["wind_speed_daily"] = apply_func_to_groups(add_time_features(fg_data["wind_speed_daily"], add_hour=False), 'region', regression_features_wind_speed_daily)
+        fg_data["wind_direction_hourly"] = apply_func_to_groups(add_time_features(fg_data["wind_direction_hourly"], add_hour=True), 'region', regression_features_wind_direction)
+        fg_data["wind_direction_daily"] = apply_func_to_groups(add_time_features(fg_data["wind_direction_daily"], add_hour=False), 'region', regression_features_wind_direction_daily)
+        fg_data["air_temperature_hourly"] = apply_func_to_groups(add_time_features(fg_data["air_temperature_hourly"], add_hour=True), 'region', regression_features_air_temperature)
+        fg_data["air_temperature_daily"] = apply_func_to_groups(add_time_features(fg_data["air_temperature_daily"], add_hour=False), 'region', regression_features_air_temperature_daily)
 
         # ===================================================================
         # [print(name + f" | Rows: {len(df)}", df.head()) for name, df in fg_data.items()] # Uncomment to debug data types & stats
