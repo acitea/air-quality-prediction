@@ -591,7 +591,7 @@ def main():
             days_lagged_df = hopsworks_client.retrieve_from_hopsworks_from_time(
                 fg, 
                 df.columns.tolist(), 
-                version=2,
+                version=4,
                 time_threshold=time_threshold
                 )
             # days_lagged_df.to_csv(f"src/hopsworks/{fg}_lagged.csv", index=False) # Uncomment to "attempt to cache" locally
@@ -615,7 +615,7 @@ def main():
 
         # Upload to Hopsworks
         print("\n[3/3] Uploading to Hopsworks...")
-        hopsworks_client.append_to_hopsworks(fg_data, version=3)
+        hopsworks_client.append_to_hopsworks(fg_data, version=4)
 
         elapsed = time.time() - start_time
         print("\n" + "=" * 70)
