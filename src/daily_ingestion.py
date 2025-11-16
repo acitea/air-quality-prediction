@@ -245,12 +245,12 @@ def process_wind_speed_data(items: List[Dict], stations: Dict) -> Tuple[pd.DataF
     df['wind_speed'] = pd.to_numeric(df['wind_speed'], errors='coerce')
     df = df.dropna(subset=['wind_speed'])
 
-    # Add station metadata
+    # Add region metadata
     df['station_name'] = df['station_id'].map(lambda x: stations.get(x, {}).get('name', 'Unknown'))
     df.drop(columns=['station_name'], axis=1, inplace=True)
-    df['region'] = _map_coords_to_region(df, REGION_COORDS)
     df['latitude'] = df['station_id'].map(lambda x: stations.get(x, {}).get('latitude'))
     df['longitude'] = df['station_id'].map(lambda x: stations.get(x, {}).get('longitude'))
+    df['region'] = _map_coords_to_region(df, REGION_COORDS)
 
     # Aggregate to hourly
     df['hour'] = df['timestamp'].dt.floor('H')
@@ -324,12 +324,12 @@ def process_wind_direction_data(items: List[Dict], stations: Dict) -> Tuple[pd.D
     # Validate 0-360 range
     df = df[(df['wind_direction'] >= 0) & (df['wind_direction'] <= 360)]
 
-    # Add station metadata
+    # Add region metadata
     df['station_name'] = df['station_id'].map(lambda x: stations.get(x, {}).get('name', 'Unknown'))
-    df['region'] = _map_coords_to_region(df, REGION_COORDS)
     df.drop(columns=['station_name'], axis=1, inplace=True)
     df['latitude'] = df['station_id'].map(lambda x: stations.get(x, {}).get('latitude'))
     df['longitude'] = df['station_id'].map(lambda x: stations.get(x, {}).get('longitude'))
+    df['region'] = _map_coords_to_region(df, REGION_COORDS)
 
     # Aggregate to hourly with circular mean
     df['hour'] = df['timestamp'].dt.floor('H')
@@ -414,12 +414,12 @@ def process_air_temperature_data(items: List[Dict], stations: Dict) -> Tuple[pd.
     df['air_temperature'] = pd.to_numeric(df['air_temperature'], errors='coerce')
     df = df.dropna(subset=['air_temperature'])
 
-    # Add station metadata
-    daily_df['region'] = _map_coords_to_region(daily_df, REGION_COORDS)
+    # Add region metadata
     df['station_name'] = df['station_id'].map(lambda x: stations.get(x, {}).get('name', 'Unknown'))
     df.drop(columns=['station_name'], axis=1, inplace=True)
     df['latitude'] = df['station_id'].map(lambda x: stations.get(x, {}).get('latitude'))
     df['longitude'] = df['station_id'].map(lambda x: stations.get(x, {}).get('longitude'))
+    df['region'] = _map_coords_to_region(df, REGION_COORDS)
 
     # Aggregate to hourly
     df['hour'] = df['timestamp'].dt.floor('H')
