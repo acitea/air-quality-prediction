@@ -20,22 +20,22 @@ warnings.filterwarnings("ignore", category=UserWarning)
 def retrieve_feature_stores(fs):
     pm25_daily_fg = fs.get_feature_group(
         name="pm25_daily",
-        version=2
+        version=4
     )
 
     wind_direction_daily_fg = fs.get_feature_group(
         name="wind_direction_daily",
-        version=3
+        version=4
     )
 
     wind_speed_daily_fg = fs.get_feature_group(
         name="wind_speed_daily",
-        version=3
+        version=4
     )
 
     air_temperature_daily_fg = fs.get_feature_group(
         name="air_temperature_daily",
-        version=3
+        version=4
     )
 
     print("pm_25_daily_fg:", "Loaded" if pm25_daily_fg is not None else "Not Loaded")
@@ -61,7 +61,7 @@ def create_feature_view(fs, pm25_daily_fg, wind_direction_daily_fg, wind_speed_d
     
     feature_view = fs.get_or_create_feature_view(
         name="air_quality_wind_temperature_features_daily_new",
-        version=2,
+        version=3,
         description="Feature view with air quality and weather features (wind speed/direction and temperature)",
         labels=['pm25'],
         query=selected_features
@@ -245,9 +245,9 @@ def main():
     random_state=42
 
     model, df, mse, r2 = train(X_features, X_test_features, y_train, y_test, X_test, n_estimators, learning_rate, max_depth, min_child_weight, subsample, colsample_bytree, reg_alpha, reg_lambda, tree_method, eval_metric, random_state)
-    # plot(model, REGION, df)
+    plot(model, REGION, df)
 
-    save(model, mse, r2, feature_view)
+    # save(model, mse, r2, feature_view)
 
 
 if __name__ == "__main__":
