@@ -159,109 +159,107 @@
     <div class="container">
         <header>
             <h1>🌍 Air Quality Prediction</h1>
-            <p class="subtitle">Real-time PM2.5 Prediction using PyTorch</p>
+            <p class="subtitle">Batched PM2.5 Prediction using XGBoost Regressor with SKLearn</p>
         </header>
         
         <div class="section">
-            <h2>📊 Latest Model Performance</h2>
-            <div id="metrics" class="metrics">
-                <div class="loading">Loading metrics...</div>
-            </div>
-        </div>
-        
-        <div class="section">
-            <h2>📈 Training Progress</h2>
+            <h2>📈 Dominating Features (top 15)</h2>
             <div class="chart-container">
                 <!-- Using relative path as outputs are copied to docs/outputs/ -->
-                <img src="outputs/training_history.png" alt="Training History" onerror="this.style.display='none'; document.getElementById('train-error').style.display='block';">
+                <img src="outputs/feature_importance_west.png" alt="Feature importance" onerror="this.style.display='none'; document.getElementById('train-error').style.display='block';">
                 <div id="train-error" class="error" style="display: none;">
-                    Training history chart not available yet. The model needs to be trained first.
+                    Feature importance chart not available yet.
                 </div>
             </div>
         </div>
         
         <div class="section">
-            <h2>🎯 Prediction Accuracy</h2>
+            <h2>🎯 Weekly Predictions (West)</h2>
             <div class="chart-container">
                 <!-- Using relative path as outputs are copied to docs/outputs/ -->
-                <img src="outputs/predictions.png" alt="Predictions vs Actuals" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
+                <img src="outputs/pm25_forecast_west.png" alt="Forecast West" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
                 <div id="pred-error" class="error" style="display: none;">
                     Predictions chart not available yet. The model needs to be trained first.
                 </div>
+                <img src="outputs/pm25_hindcast_west_1day.png" alt="Hindcast West" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎯 Weekly Predictions (East)</h2>
+            <div class="chart-container">
+                <!-- Using relative path as outputs are copied to docs/outputs/ -->
+                <img src="outputs/pm25_forecast_east.png" alt="Forecast East" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
+                <div id="pred-error" class="error" style="display: none;">
+                    Predictions chart not available yet. The model needs to be trained first.
+                </div>
+                <img src="outputs/pm25_hindcast_east_1day.png" alt="Hindcast East" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎯 Weekly Predictions (Central)</h2>
+            <div class="chart-container">
+                <!-- Using relative path as outputs are copied to docs/outputs/ -->
+                <img src="outputs/pm25_forecast_central.png" alt="Forecast Central" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
+                <div id="pred-error" class="error" style="display: none;">
+                    Predictions chart not available yet. The model needs to be trained first.
+                </div>
+                <img src="outputs/pm25_hindcast_central_1day.png" alt="Hindcast Central" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎯 Weekly Predictions (North)</h2>
+            <div class="chart-container">
+                <!-- Using relative path as outputs are copied to docs/outputs/ -->
+                <img src="outputs/pm25_forecast_north.png" alt="Forecast North" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
+                <div id="pred-error" class="error" style="display: none;">
+                    Predictions chart not available yet. The model needs to be trained first.
+                </div>
+                <img src="outputs/pm25_hindcast_north_1day.png" alt="Hindcast North" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎯 Weekly Predictions (South)</h2>
+            <div class="chart-container">
+                <!-- Using relative path as outputs are copied to docs/outputs/ -->
+                <img src="outputs/pm25_forecast_south.png" alt="Forecast South" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
+                <div id="pred-error" class="error" style="display: none;">
+                    Predictions chart not available yet. The model needs to be trained first.
+                </div>
+                <img src="outputs/pm25_hindcast_south_1day.png" alt="Hindcast South" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎯 Training Predicted versus Real</h2>
+            <div class="chart-container">
+                <!-- Using relative path as outputs are copied to docs/outputs/ -->
+                <div id="pred-error" class="error" style="display: none;">
+                    Predictions chart not available yet. The model needs to be trained first.
+                </div>
+                <img src="outputs/pm25_train_test_hindcast_south.png" alt="Hindcast Train South" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
+                <img src="outputs/pm25_train_test_hindcast_west.png" alt="Hindcast Train West" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
+                <img src="outputs/pm25_train_test_hindcast_east.png" alt="Hindcast Train East" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
+                <img src="outputs/pm25_train_test_hindcast_central.png" alt="Hindcast Train Central" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
+                <img src="outputs/pm25_train_test_hindcast_north.png" alt="Hindcast Train North" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
             </div>
         </div>
         
         <div class="section">
             <h2>ℹ️ About This Project</h2>
             <div class="info-box">
-                <p><strong>Model Architecture:</strong> Neural Network with 2 hidden layers (64 neurons each)</p>
-                <p><strong>Input Features:</strong> Temperature, Humidity, Wind Speed, Pressure, Traffic Density</p>
-                <p><strong>Output:</strong> PM2.5 Concentration (µg/m³)</p>
-                <p><strong>Training Schedule:</strong> Automated daily training via GitHub Actions</p>
-                <p><strong>Framework:</strong> PyTorch with UV package manager</p>
+                <p><strong>Input Features:</strong> Air Temperature, Wind Speed and Wind Direction</p>
+                <p><strong>Output:</strong> AQI pm2.5</p>
             </div>
-        </div>
-        
-        <div id="timestamp" class="timestamp">
-            Last updated: <span id="update-time">Loading...</span>
         </div>
 
         <footer>
-            <p>Built with PyTorch and UV | <a href="https://github.com/acitea/air-quality-prediction" target="_blank">View on GitHub</a></p>
+            <p>Built with Sci Kit Learn and UV | <a href="https://github.com/acitea/air-quality-prediction" target="_blank">View on GitHub</a></p>
         </footer>
     </div>
     
-    <script>
-        // Fetch and display latest results
-        async function loadResults() {
-            try {
-                // Using relative path as outputs are copied to docs/outputs/
-                const response = await fetch('outputs/latest_results.json');
-                const data = await response.json();
-                
-                // Update metrics
-                const metricsDiv = document.getElementById('metrics');
-                metricsDiv.innerHTML = `
-                    <div class="metric-card">
-                        <h3>Training Loss</h3>
-                        <div class="value">${data.final_train_loss.toFixed(2)}</div>
-                    </div>
-                    <div class="metric-card">
-                        <h3>Test Loss</h3>
-                        <div class="value">${data.final_test_loss.toFixed(2)}</div>
-                    </div>
-                    <div class="metric-card">
-                        <h3>Mean Absolute Error</h3>
-                        <div class="value">${data.predictions.mae.toFixed(2)}</div>
-                    </div>
-                    <div class="metric-card">
-                        <h3>Device Used</h3>
-                        <div class="value">${data.device.toUpperCase()}</div>
-                    </div>
-                `;
-                
-                // Update timestamp
-                const timestamp = data.timestamp;
-                const year = timestamp.substring(0, 4);
-                const month = timestamp.substring(4, 6);
-                const day = timestamp.substring(6, 8);
-                const hour = timestamp.substring(9, 11);
-                const minute = timestamp.substring(11, 13);
-                const dateStr = `${year}-${month}-${day} ${hour}:${minute} UTC`;
-                
-                document.getElementById('update-time').textContent = dateStr;
-            } catch (error) {
-                document.getElementById('metrics').innerHTML = `
-                    <div class="error">
-                        Unable to load results. The model may not have been trained yet.
-                    </div>
-                `;
-                document.getElementById('update-time').textContent = 'Not available';
-            }
-        }
-        
-        // Load results when page loads
-        loadResults();
-    </script>
 </body>
 </html>
