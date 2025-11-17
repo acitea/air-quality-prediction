@@ -247,7 +247,7 @@ def main():
         monitor_fg = fs.get_or_create_feature_group(
             name='aq_predictions',
             description='Air Quality prediction monitoring',
-            version=8,
+            version=9,
             primary_key=['region','timestamp','days_before_forecast_day'],
             event_time="timestamp"
         )
@@ -260,6 +260,7 @@ def main():
 
         hindcast_df = pd.merge(preds_df, outcome_df, on=["timestamp", "region"])
         hindcast_df = hindcast_df.sort_values(by=['timestamp'])
+        hindcast_df = hindcast_df[hindcast_df['region'] == REGION]
         
         hindcast_path = f"{images_dir}/pm25_hindcast_{REGION}_1day.png"
         plt = plot_air_quality_forecast('Singapore', REGION, hindcast_df, hindcast_path, hindcast=True)
