@@ -247,7 +247,7 @@ def main():
         monitor_fg = fs.get_or_create_feature_group(
             name='aq_predictions',
             description='Air Quality prediction monitoring',
-            version=7,
+            version=8,
             primary_key=['region','timestamp','days_before_forecast_day'],
             event_time="timestamp"
         )

@@ -173,7 +173,7 @@
             <h2>📈 Dominating Features (top 15)</h2>
             <div class="chart-container">
                 <!-- Using relative path as outputs are copied to docs/outputs/ -->
-                <img src="../air_quality_model/images/feature_importance.png" alt="Feature importance" onerror="this.style.display='none'; document.getElementById('train-error').style.display='block';">
+                <img src="outputs/pm25_forecast_west.png" alt="Feature importance" onerror="this.style.display='none'; document.getElementById('train-error').style.display='block';">
                 <div id="train-error" class="error" style="display: none;">
                     Feature importance chart not available yet.
                 </div>
@@ -181,10 +181,54 @@
         </div>
         
         <div class="section">
-            <h2>🎯 Weekly Predictions</h2>
+            <h2>🎯 Weekly Predictions (West)</h2>
             <div class="chart-container">
                 <!-- Using relative path as outputs are copied to docs/outputs/ -->
-                <img src="../air_quality_model/images/pm25_forecast.png" alt="Forecast" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
+                <img src="outputs/pm25_forecast_west.png" alt="Forecast West" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
+                <div id="pred-error" class="error" style="display: none;">
+                    Predictions chart not available yet. The model needs to be trained first.
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎯 Weekly Predictions (East)</h2>
+            <div class="chart-container">
+                <!-- Using relative path as outputs are copied to docs/outputs/ -->
+                <img src="outputs/pm25_forecast_east.png" alt="Forecast East" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
+                <div id="pred-error" class="error" style="display: none;">
+                    Predictions chart not available yet. The model needs to be trained first.
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎯 Weekly Predictions (Central)</h2>
+            <div class="chart-container">
+                <!-- Using relative path as outputs are copied to docs/outputs/ -->
+                <img src="outputs/pm25_forecast_central.png" alt="Forecast Central" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
+                <div id="pred-error" class="error" style="display: none;">
+                    Predictions chart not available yet. The model needs to be trained first.
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎯 Weekly Predictions (North)</h2>
+            <div class="chart-container">
+                <!-- Using relative path as outputs are copied to docs/outputs/ -->
+                <img src="outputs/pm25_forecast_north.png" alt="Forecast North" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
+                <div id="pred-error" class="error" style="display: none;">
+                    Predictions chart not available yet. The model needs to be trained first.
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎯 Weekly Predictions (South)</h2>
+            <div class="chart-container">
+                <!-- Using relative path as outputs are copied to docs/outputs/ -->
+                <img src="outputs/pm25_forecast_south.png" alt="Forecast South" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
                 <div id="pred-error" class="error" style="display: none;">
                     Predictions chart not available yet. The model needs to be trained first.
                 </div>
@@ -194,11 +238,10 @@
         <div class="section">
             <h2>ℹ️ About This Project</h2>
             <div class="info-box">
-                <p><strong>Model Architecture:</strong> Neural Network with 2 hidden layers (64 neurons each)</p>
+                <p><strong>Model Architecture:</strong> </p>
                 <p><strong>Input Features:</strong> Temperature, Humidity, Wind Speed, Pressure, Traffic Density</p>
                 <p><strong>Output:</strong> PM2.5 Concentration (µg/m³)</p>
-                <p><strong>Training Schedule:</strong> Automated daily training via GitHub Actions</p>
-                <p><strong>Framework:</strong> PyTorch with UV package manager</p>
+                <!-- <p><strong>Training Schedule:</strong> Automated daily training via GitHub Actions</p> -->
             </div>
         </div>
         

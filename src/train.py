@@ -1,5 +1,6 @@
 import os
 from datetime import datetime, timedelta
+from zipfile import Path
 import dotenv
 import pandas as pd
 from xgboost import XGBRegressor
@@ -183,22 +184,16 @@ def train(X_features, X_test_features, y_train, y_test, X_test, n_estimators, le
 
 def plot(model, REGION, df):
     # Creating a directory for the model artifacts if it doesn't exist
-    model_dir = "air_quality_model"
-    if not os.path.exists(model_dir):
-        os.mkdir(model_dir)
-    images_dir = model_dir + "/images"
-    if not os.path.exists(images_dir):
-        os.mkdir(images_dir)
-
-    file_path = images_dir + "/pm25_hindcast.png"
+    root_dir = Path().absolute()
+    images_dir = os.path.join(root_dir, "docs", "outputs")
+    
+    file_path = images_dir + "/pm25_train_test_hindcast.png"
     plt = plot_air_quality_forecast('Singapore', REGION, df, file_path, hindcast=True) 
-    plt.show()
 
     # Plotting feature importances using the plot_importance function from XGBoost
     plot_importance(model.get_booster(), max_num_features=15)
     feature_importance_path = images_dir + "/feature_importance.png"
     plt.savefig(feature_importance_path)
-    plt.show()
 
 
 def save(model, mse, r2, feature_view, REGION):
@@ -247,7 +242,7 @@ def main():
         print("Feature view created:", feature_view.name)
         X_features, y_train, X_test_features, y_test, X_test = split_data(feature_view, START_DATE)
         model, df, mse, r2 = train(X_features, X_test_features, y_train, y_test, X_test, n_estimators, learning_rate, max_depth, min_child_weight, subsample, colsample_bytree, reg_alpha, reg_lambda, tree_method, eval_metric, random_state)
-        # plot(model, REGION, df)
+        plot(model, REGION, df)
         save(model, mse, r2, feature_view, REGION)
 
 
