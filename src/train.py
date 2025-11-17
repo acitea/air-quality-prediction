@@ -1,6 +1,6 @@
 import os
 from datetime import datetime, timedelta
-from zipfile import Path
+from pathlib import Path
 import dotenv
 import pandas as pd
 from xgboost import XGBRegressor
