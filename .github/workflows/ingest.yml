@@ -31,6 +31,12 @@ jobs:
         run: |
           uv run src/forecasts_ingestion.py
           uv run src/daily_ingestion.py
+      - name: Run predictions
+        env:
+          HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
+          HOPSWORKS_PROJECT_NAME: ${{ secrets.HOPSWORKS_PROJECT_NAME }}
+        run: |
+          ipython notebooks/5_predictions.ipynb
       - name: Get current date
         id: date
         run: |
