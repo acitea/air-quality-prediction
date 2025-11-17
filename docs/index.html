@@ -173,7 +173,7 @@
             <h2>📈 Dominating Features (top 15)</h2>
             <div class="chart-container">
                 <!-- Using relative path as outputs are copied to docs/outputs/ -->
-                <img src="outputs/pm25_forecast_west.png" alt="Feature importance" onerror="this.style.display='none'; document.getElementById('train-error').style.display='block';">
+                <img src="outputs/feature_importance_west.png" alt="Feature importance" onerror="this.style.display='none'; document.getElementById('train-error').style.display='block';">
                 <div id="train-error" class="error" style="display: none;">
                     Feature importance chart not available yet.
                 </div>
@@ -188,6 +188,7 @@
                 <div id="pred-error" class="error" style="display: none;">
                     Predictions chart not available yet. The model needs to be trained first.
                 </div>
+                <img src="outputs/pm25_hindcast_west_1day.png" alt="Hindcast West" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
             </div>
         </div>
 
@@ -199,6 +200,7 @@
                 <div id="pred-error" class="error" style="display: none;">
                     Predictions chart not available yet. The model needs to be trained first.
                 </div>
+                <img src="outputs/pm25_hindcast_east_1day.png" alt="Hindcast East" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
             </div>
         </div>
 
@@ -210,6 +212,7 @@
                 <div id="pred-error" class="error" style="display: none;">
                     Predictions chart not available yet. The model needs to be trained first.
                 </div>
+                <img src="outputs/pm25_hindcast_central_1day.png" alt="Hindcast Central" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
             </div>
         </div>
 
@@ -221,6 +224,7 @@
                 <div id="pred-error" class="error" style="display: none;">
                     Predictions chart not available yet. The model needs to be trained first.
                 </div>
+                <img src="outputs/pm25_hindcast_north_1day.png" alt="Hindcast North" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
             </div>
         </div>
 
@@ -232,6 +236,22 @@
                 <div id="pred-error" class="error" style="display: none;">
                     Predictions chart not available yet. The model needs to be trained first.
                 </div>
+                <img src="outputs/pm25_hindcast_south_1day.png" alt="Hindcast South" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎯 Training Predicted versus Real</h2>
+            <div class="chart-container">
+                <!-- Using relative path as outputs are copied to docs/outputs/ -->
+                <div id="pred-error" class="error" style="display: none;">
+                    Predictions chart not available yet. The model needs to be trained first.
+                </div>
+                <img src="outputs/pm25_train_test_hindcast_south.png" alt="Hindcast Train South" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
+                <img src="outputs/pm25_train_test_hindcast_west.png" alt="Hindcast Train West" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
+                <img src="outputs/pm25_train_test_hindcast_east.png" alt="Hindcast Train East" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
+                <img src="outputs/pm25_train_test_hindcast_central.png" alt="Hindcast Train Central" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
+                <img src="outputs/pm25_train_test_hindcast_north.png" alt="Hindcast Train North" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
             </div>
         </div>
         
