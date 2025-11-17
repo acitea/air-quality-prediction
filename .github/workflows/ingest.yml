@@ -29,6 +29,7 @@ jobs:
           HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
           HOPSWORKS_PROJECT_NAME: ${{ secrets.HOPSWORKS_PROJECT_NAME }}
         run: |
+          uv run src/forecasts_ingestion.py
           uv run src/daily_ingestion.py
       - name: Get current date
         id: date

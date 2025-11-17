@@ -67,8 +67,6 @@ def regression_features_wind_direction(df: pd.DataFrame):
     """Prepare features for time series regression modeling"""
     df = df.copy().sort_values('timestamp').reset_index(drop=True)
 
-    # Map coordinates to a sensor region
-    df["region"] = _map_coords_to_region(df, REGION_COORDS)
 
     # Convert direction to vector components (recommended for modeling)
     df['wind_u'] = -np.sin(np.deg2rad(df['wind_direction_avg']))
@@ -97,8 +95,6 @@ def regression_features_wind_speed(df: pd.DataFrame):
     """Prepare features for time series regression modeling"""
     df = df.copy().sort_values('timestamp').reset_index(drop=True)
 
-    # Map coordinates to a sensor region
-    df["region"] = _map_coords_to_region(df, REGION_COORDS)
 
     # Lag features
     for lag in [1, 2, 3, 6, 12, 24, 48, 72, 168]:
@@ -122,8 +118,6 @@ def regression_features_air_temperature(df: pd.DataFrame):
     """Prepare features for time series regression modeling"""
     df = df.copy().sort_values('timestamp').reset_index(drop=True)
 
-    # Map coordinates to a sensor region
-    df["region"] = _map_coords_to_region(df, REGION_COORDS)
 
     # Lag features
     for lag in [1, 2, 3, 6, 12, 24, 48, 72, 168]:
@@ -146,8 +140,6 @@ def regression_features_wind_direction_daily(df: pd.DataFrame):
     """Prepare features for time series regression modeling"""
     df = df.copy().sort_values('timestamp').reset_index(drop=True)
 
-    # Map coordinates to a sensor region
-    df["region"] = _map_coords_to_region(df, REGION_COORDS)
 
     # Convert direction to vector components (recommended for modeling)
     df['wind_u'] = -np.sin(np.deg2rad(df['wind_direction_avg_mean']))
@@ -176,8 +168,6 @@ def regression_features_wind_speed_daily(df: pd.DataFrame):
     """Prepare features for time series regression modeling"""
     df = df.copy().sort_values('timestamp').reset_index(drop=True)
 
-    # Map coordinates to a sensor region
-    df["region"] = _map_coords_to_region(df, REGION_COORDS)
 
     # Lag features
     for lag in [1, 2, 3, 4, 5, 6, 7, 14, 28]:
@@ -201,8 +191,6 @@ def regression_features_air_temperature_daily(df: pd.DataFrame):
     """Prepare features for time series regression modeling"""
     df = df.copy().sort_values('timestamp').reset_index(drop=True)
 
-    # Map coordinates to a sensor region
-    df["region"] = _map_coords_to_region(df, REGION_COORDS)
 
     # Lag features
     for lag in [1, 2, 3, 4, 5, 6, 7, 14, 28]:
