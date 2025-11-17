@@ -1,6 +1,6 @@
 # Air Quality Prediction 🌍
 
-Predicts US AQI PM2.5 air quality levels using environmental data retrieved from [NEA](https://data.gov.sg). The project features automated daily training via GitHub Actions and real-time results visualization through GitHub Pages.
+Predicts US AQI PM2.5 air quality levels using environmental data retrieved from [NEA](https://data.gov.sg) and forecasted environmental data from [Open-Meteo](https://open-meteo.com). The project features automated daily training via GitHub Actions and real-time results visualization through GitHub Pages.
 
 ## Installation
 
@@ -40,16 +40,20 @@ uv sync
 
 Run the training pipeline:
 ```bash
-uv run -m src/train.py
+uv run src/train.py
+```
+
+### Run inference for forecasted predictions
+
+Run the prediction pipeline:
+```bash
+uv run src/predict.py
 ```
 
 ### View Results
 
-After training, check the generated files:
-- `air_quality_model_/images/feature_importance.png`
-- `air_quality_model_/images/pm25_forecast.png`
-- `air_quality_model_/images/pm25_hindcast.png`
-- `air_quality_model_/images/pm25_hindcast_1day.png`
+After training, check the generated files under ```docs/outputs/*.png```.
+Hindcast & 7-day predictions for all 5 active PM2.5 sensors are available.
 
 ### GitHub Pages Dashboard
 
@@ -61,23 +65,26 @@ Visit the GitHub Pages site to see latest predictions and model performance: [Vi
 air-quality-prediction/
 ├── .github/
 │   └── workflows/
-│       ├── ingest.yml          # Daily data ingestion workflow
-│       ├── train.yml           # Daily training workflow
+│       ├── ingest.yml          # Daily data ingestion workflow @ 0030hrs SGT
+│       ├── train.yml           # Daily training workflow @ 0130hrs SGT
+│       ├── predict.yml         # Daily batch inference workflow @ 0230hrs SGT
 │       └── deploy-pages.yml    # GitHub Pages deployment
 ├── notebooks/
 │       └── *.ipynb             # Various notebooks for eda and development
 ├── src/
-│   └── uitls/
+│   └── utils/
 │       └── *.py                # Short scripts for general utils
 │   ├── __init__.py             # Package entry point
-│   ├── daily_ingestion.py             # Main python script to process daily ingestion
+│   ├── daily_ingestion.py      # Main python script to process daily ingestion
 │   ├── <other files>.py        # Other scripts used
+│   ├── predict.py              # Batch inference pipeline
 │   └── train.py                # Training pipeline
 ├── data/                       # Data directory
-├── air_quality_model/          # Model + Outputs
 ├── docs/                       # GitHub Pages site
 │   ├── index.html              # Dashboard HTML
-│   └── outputs/                # Copied outputs for web display
+│   └── outputs/                # Outputs destination
+│       ├── *.png               # Plotted graphs with predictions
+│       └── model/              # Saved model output directory
 ├── pyproject.toml              # UV project configuration
 ├── uv.lock                     # UV project configuration
 └── README.md                   # This file
