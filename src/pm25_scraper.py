@@ -3,10 +3,12 @@ PM2.5 Data Scraper with Date Iteration and Checkpoint System
 =============================================================
 """
 
+import numpy as np
 import pandas as pd
 import requests
 from datetime import datetime, timedelta
 import json
+from utils.conversion import CONC_TO_AQI
 from utils.date import date_range_generator
 import os
 
@@ -264,6 +266,8 @@ def process_and_save_by_region(items, output_prefix="pm25"):
         region_df = df[['timestamp', 'date', region]].copy()
         region_df = region_df.rename(columns={region: 'pm25'})
         region_df = region_df.dropna(subset=['pm25'])
+        region_df['pm25'] = np.take(CONC_TO_AQI, np.floor(region_df["pm25"]))
+
 
         filename = f"{region}-pm2.5-hourly-230701-251101.csv"
         # save_filepath = os.path.join(CHECKPOINT_DIR, filename)

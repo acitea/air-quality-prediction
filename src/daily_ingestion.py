@@ -53,6 +53,7 @@ from utils.regression import \
     regression_features_air_temperature_daily, \
     apply_func_to_groups, \
     add_time_features
+from utils.conversion import CONC_TO_AQI
 
 def _map_coords_to_region(df: pd.DataFrame, region_coords: pd.DataFrame) -> pd.Series:
     """
@@ -195,6 +196,10 @@ def process_pm25_data(items: List[Dict]) -> Tuple[pd.DataFrame, pd.DataFrame]:
 
     print(f"  Processed {len(hourly_df)} hourly PM2.5 records")
 
+    # converting the value from conc to AQI based on https://aqicn.org/scale/
+    # leaving out the hourly because it has always been based on conc
+    df['pm25'] = np.take(CONC_TO_AQI, np.floor(df["pm25"]))
+
     # Daily aggregations
     df['date'] = df['timestamp'].dt.date
     daily_df = df.groupby(['region', 'date']).agg({
@@ -204,6 +209,7 @@ def process_pm25_data(items: List[Dict]) -> Tuple[pd.DataFrame, pd.DataFrame]:
     daily_df.columns = ['region', 'date', 'pm25']
     daily_df['timestamp'] = pd.to_datetime(daily_df['date'])
     daily_df = daily_df.drop('date', axis=1)
+    daily_df['pm25'] = daily_df['pm25'].round()
 
     print(f"  Processed {len(daily_df)} daily PM2.5 records")
 
@@ -559,7 +565,7 @@ def main():
         )
 
             
-        if pm25_hourly_df.empty and \
+        if pm25_hourly_df.empty and pm25_daily_df.empty and \
            wind_speed_df.empty and wind_speed_daily_df.empty and \
            wind_direction_df.empty and wind_direction_daily_df.empty and \
            air_temperature_df.empty and air_temperature_daily_df.empty:
