@@ -162,29 +162,29 @@
             <p class="subtitle">Real-time PM2.5 Prediction using PyTorch</p>
         </header>
         
-        <div class="section">
+        <!-- <div class="section">
             <h2>📊 Latest Model Performance</h2>
             <div id="metrics" class="metrics">
                 <div class="loading">Loading metrics...</div>
             </div>
-        </div>
+        </div> -->
         
         <div class="section">
-            <h2>📈 Training Progress</h2>
+            <h2>📈 Dominating Features (top 15)</h2>
             <div class="chart-container">
                 <!-- Using relative path as outputs are copied to docs/outputs/ -->
-                <img src="outputs/training_history.png" alt="Training History" onerror="this.style.display='none'; document.getElementById('train-error').style.display='block';">
+                <img src="../air_quality_model/images/feature_importance.png" alt="Feature importance" onerror="this.style.display='none'; document.getElementById('train-error').style.display='block';">
                 <div id="train-error" class="error" style="display: none;">
-                    Training history chart not available yet. The model needs to be trained first.
+                    Feature importance chart not available yet.
                 </div>
             </div>
         </div>
         
         <div class="section">
-            <h2>🎯 Prediction Accuracy</h2>
+            <h2>🎯 Weekly Predictions</h2>
             <div class="chart-container">
                 <!-- Using relative path as outputs are copied to docs/outputs/ -->
-                <img src="outputs/predictions.png" alt="Predictions vs Actuals" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
+                <img src="../air_quality_model/images/pm25_forecast.png" alt="Forecast" onerror="this.style.display='none'; document.getElementById('pred-error').style.display='block';">
                 <div id="pred-error" class="error" style="display: none;">
                     Predictions chart not available yet. The model needs to be trained first.
                 </div>
