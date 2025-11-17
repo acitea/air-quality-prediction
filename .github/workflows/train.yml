@@ -40,28 +40,8 @@ jobs:
           uv sync
       
       - name: Run training
+        env:
+          HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
+          HOPSWORKS_PROJECT_NAME: ${{ secrets.HOPSWORKS_PROJECT_NAME }}
         run: |
-          uv run python -m air_quality_prediction.train
-      
-      - name: Update docs with latest results
-        run: |
-          bash scripts/update_docs.sh
-      
-      - name: Upload model artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: model-${{ github.run_number }}
-          path: models/*.pt
-          retention-days: 30
-      
-      - name: Commit and push results
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add outputs/ docs/outputs/
-          if ! git diff --quiet --staged; then
-            git commit -m "Update training results [skip ci]"
-            git push
-          else
-            echo "No changes to commit"
-          fi
+          uv run src/train.py
