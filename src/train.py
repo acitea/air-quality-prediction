@@ -201,7 +201,7 @@ def plot(model, REGION, df):
     plt.show()
 
 
-def save(model, mse, r2, feature_view):
+def save(model, mse, r2, feature_view, REGION):
     project = hopsworks.login(engine="python", project="akeelaf")
     model_dir = "air_quality_model"
     model.save_model(model_dir + "/model.json")
@@ -211,10 +211,10 @@ def save(model, mse, r2, feature_view):
     }
     mr = project.get_model_registry()
     aq_model = mr.python.create_model(
-        name="air_quality_xgboost_model", 
+        name=f"air_quality_xgboost_model_{REGION}", 
         metrics= res_dict,
         feature_view=feature_view,
-        description="Air Quality (PM2.5) predictor",
+        description="Air Quality (PM2.5) predictor for region " + REGION,
     )
 
     # Saving the model artifacts to the 'air_quality_model' directory in the model registry
@@ -222,15 +222,10 @@ def save(model, mse, r2, feature_view):
 
 
 def main():
-    REGION = "west" # TODO: support multiple regions
     START_DATE = "2025-10-01"
 
     fs = get_hopsworks_project()
-    pm25_daily_fg, wind_direction_daily_fg, wind_speed_daily_fg, air_temperature_daily_fg = retrieve_feature_stores(fs)
-    feature_view = create_feature_view(fs, pm25_daily_fg, wind_direction_daily_fg, wind_speed_daily_fg, air_temperature_daily_fg, REGION=REGION)
-    print("Feature view created:", feature_view.name)
-    X_features, y_train, X_test_features, y_test, X_test = split_data(feature_view, START_DATE)
-    
+
     # Creating an instance of the XGBoost Regressor
     n_estimators = 3000
     learning_rate = 0.02
@@ -244,10 +239,16 @@ def main():
     eval_metric="mae"
     random_state=42
 
-    model, df, mse, r2 = train(X_features, X_test_features, y_train, y_test, X_test, n_estimators, learning_rate, max_depth, min_child_weight, subsample, colsample_bytree, reg_alpha, reg_lambda, tree_method, eval_metric, random_state)
-    # plot(model, REGION, df)
-
-    save(model, mse, r2, feature_view)
+    REGIONS = ["west", "east", "central", "north", "south"]
+    for REGION in REGIONS:
+        print(f"Training model for region: {REGION}")
+        pm25_daily_fg, wind_direction_daily_fg, wind_speed_daily_fg, air_temperature_daily_fg = retrieve_feature_stores(fs)
+        feature_view = create_feature_view(fs, pm25_daily_fg, wind_direction_daily_fg, wind_speed_daily_fg, air_temperature_daily_fg, REGION=REGION)
+        print("Feature view created:", feature_view.name)
+        X_features, y_train, X_test_features, y_test, X_test = split_data(feature_view, START_DATE)
+        model, df, mse, r2 = train(X_features, X_test_features, y_train, y_test, X_test, n_estimators, learning_rate, max_depth, min_child_weight, subsample, colsample_bytree, reg_alpha, reg_lambda, tree_method, eval_metric, random_state)
+        # plot(model, REGION, df)
+        save(model, mse, r2, feature_view, REGION)
 
 
 if __name__ == "__main__":
