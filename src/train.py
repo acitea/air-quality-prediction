@@ -187,18 +187,19 @@ def plot(model, REGION, df):
     root_dir = Path().absolute()
     images_dir = os.path.join(root_dir, "docs", "outputs")
     
-    file_path = images_dir + "/pm25_train_test_hindcast.png"
+    file_path = images_dir + f"/pm25_train_test_hindcast_{REGION}.png"
     plt = plot_air_quality_forecast('Singapore', REGION, df, file_path, hindcast=True) 
 
     # Plotting feature importances using the plot_importance function from XGBoost
     plot_importance(model.get_booster(), max_num_features=15)
-    feature_importance_path = images_dir + "/feature_importance.png"
+    feature_importance_path = images_dir + f"/feature_importance_{REGION}.png"
     plt.savefig(feature_importance_path)
 
 
 def save(model, mse, r2, feature_view, REGION):
     project = hopsworks.login(engine="python", project="akeelaf")
-    model_dir = "air_quality_model"
+    root_dir = Path().absolute()
+    model_dir = os.path.join(root_dir, "docs", "outputs", "model")
     model.save_model(model_dir + "/model.json")
     res_dict = { 
         "MSE": str(mse),
