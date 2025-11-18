@@ -50,11 +50,8 @@ class Hopsworks:
             print(f"  Uploading to feature group: {fg_name} ({len(df)} records)")
 
             try:
-                if idx == 5: 
-                    print("    Pausing for 150 seconds to avoid rate limits...")
-                    time.sleep(150)
-                    idx = 0
-                self.fs.get_feature_group(fg_name, version=version).insert(df)
+                shouldWait = (idx % 4 == 0 or idx == len(data) - 1)
+                self.fs.get_feature_group(fg_name, version=version).insert(df, wait=shouldWait)
                 idx += 1
             except Exception as e:
                 print(f"    ✗ Failed to upload to {fg_name}: {e}")
