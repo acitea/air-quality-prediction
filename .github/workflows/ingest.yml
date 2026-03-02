@@ -1,9 +1,9 @@
 name: Daily Weather Data Ingestion
 
 on:
-  schedule:
-    # Run daily at 4:30 PM UTC (12:30 AM SGT next day)
-    - cron: '30 16 * * *'
+  # schedule: # disabled as feature stores are spun down
+  #   # Run daily at 4:30 PM UTC (12:30 AM SGT next day)
+  #   - cron: '30 16 * * *'
 
   workflow_dispatch:  # Allow manual trigger
 
